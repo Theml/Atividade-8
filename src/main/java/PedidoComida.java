@@ -1,4 +1,3 @@
-package src.main.java;
 import java.util.Optional;
 // Factory Pedido feito de Restaurante
 public class PedidoComida extends Pedido {

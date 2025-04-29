@@ -1,4 +1,3 @@
-package src.main.java;
 // Classe que representa um produto
 public class Produto {
     private int id;

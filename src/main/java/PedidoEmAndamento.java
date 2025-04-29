@@ -1,11 +1,10 @@
-package src.main.java;
 public class PedidoEmAndamento implements PedidoState {
     private static PedidoEmAndamento instance = new PedidoEmAndamento();
     private static final NotificacaoService notificacaoService = new MockNotificacaoService();
 
     private PedidoEmAndamento() {}
 
-    public static PedidoEmAndamento getInstance() {
+    public static PedidoState getInstance() {
         return instance;
     }
 

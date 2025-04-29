@@ -1,4 +1,3 @@
-package src.main.java;
 // Estado de Pedido cancelado - Implementação do padrão State
 public class PedidoCancelado implements PedidoState {
 

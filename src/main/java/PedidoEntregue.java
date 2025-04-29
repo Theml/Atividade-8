@@ -1,4 +1,3 @@
-package src.main.java;
 // Estado de Pedido Entregue - Implementação do padrão State
 public class PedidoEntregue implements PedidoState {
 

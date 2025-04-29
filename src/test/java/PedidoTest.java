@@ -1,19 +1,5 @@
-package src.test.java;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import src.main.java.Cliente;
-import src.main.java.ItemPedido;
-import src.main.java.MockNotificacaoService;
-import src.main.java.NotificacaoService;
-import src.main.java.Pedido;
-import src.main.java.PedidoCancelado;
-import src.main.java.PedidoComida;
-import src.main.java.PedidoEmAndamento;
-import src.main.java.PedidoEntregue;
-import src.main.java.PedidoMercado;
-import src.main.java.Produto;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -25,7 +11,7 @@ public class PedidoTest {
     @BeforeEach
     public void setUp() {
         notificacaoServiceMock = mock(NotificacaoService.class);
-        clienteMock = new Cliente("João", "joao@test.com", "Rua Teste", "123456789");
+        clienteMock = new Cliente("João", "joao@test.com", "Rua Teste", "123456789","");
         pedido = new PedidoComida(1, clienteMock, notificacaoServiceMock);
     }
     

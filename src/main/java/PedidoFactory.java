@@ -1,9 +1,14 @@
-package src.main.java;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 public class PedidoFactory {
+
+    @FunctionalInterface
+    interface PedidoCreator {
+        Pedido criar(int id, Cliente cliente);
+    }
+
     private static int nextId = 1;
     private final Map<String, PedidoCreator> creators;
     private final NotificacaoService notificacaoService;
@@ -24,9 +29,4 @@ public class PedidoFactory {
                 .map(creator -> creator.criar(nextId++, cliente))
                 .orElseThrow(() -> new IllegalArgumentException("Tipo de pedido não suportado: " + tipo));
     }
-}
-
-@FunctionalInterface
-interface PedidoCreator {
-    Pedido criar(int id, Cliente cliente);
 }

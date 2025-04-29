@@ -1,4 +1,3 @@
-package src.main.java;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Optional;
