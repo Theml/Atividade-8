@@ -1,3 +1,4 @@
+package src.main.java;
 public class ItemPedido {
     private Produto produto;
     private int quantidade;
