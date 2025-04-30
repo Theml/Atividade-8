@@ -8,20 +8,24 @@ public abstract class Pedido extends Observable {
     private LocalDateTime dataAgendamento;
     private LocalDateTime dataEntrega;
 
-    public Pedido(int id, Cliente cliente) {
+
+    public Pedido(int id, Cliente cliente, LocalDateTime dataAgendamento) {
+    if (dataAgendamento == null || dataAgendamento.isBefore(LocalDateTime.now())) {
+        throw new IllegalArgumentException("Data de agendamento inválida");
+    }
         this.id = id;
         this.cliente = cliente;
         this.addObserver(cliente);
-        // Inicia diretamente como Agendado (conforme seu requisito)
-        this.estado = null;
+        this.dataAgendamento = dataAgendamento;
+        this.estado = new EstadoAgendado(dataAgendamento);
     }
 
-    public void agendar(LocalDateTime data) {
-        if (data.isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Data de agendamento não pode ser no passado");
+    public void agendar(LocalDateTime novaData) {
+        if (novaData.isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Data de reagendamento não pode ser no passado");
         }
-        this.dataAgendamento = data;
-        setEstado(new EstadoAgendado(data));
+        this.dataAgendamento = novaData;
+        setEstado(new EstadoAgendado(novaData));
     }
 
     public void marcarComoEntregue() {
