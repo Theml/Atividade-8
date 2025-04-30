@@ -8,7 +8,6 @@ public class Cliente implements Observer {
         this.nome = nome;
     }
 
-
     public void update(Observable o, Object arg) {
         System.out.println(nome + " recebeu notificação: " + arg);
     }

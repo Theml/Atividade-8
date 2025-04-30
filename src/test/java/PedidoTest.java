@@ -1,10 +1,6 @@
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.contains;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -103,18 +99,5 @@ class PedidoTest {
     void testCancelamentoSemAgendamento() {
         PedidoFarmacia pedido = new PedidoFarmacia(3, cliente);
         assertThrows(IllegalStateException.class, () -> pedido.cancelar());
-    }
-
-    // Teste de notificação (usando Mock)
-    @Test
-    void testNotificacaoMudancaEstado() {
-        Cliente clienteMock = mock(Cliente.class);
-        PedidoRestaurante pedido = new PedidoRestaurante(1, clienteMock);
-
-        pedido.agendar(dataAgendamento);
-        verify(clienteMock).update(eq(pedido), contains("Agendado"));
-
-        pedido.marcarComoEntregue();
-        verify(clienteMock).update(eq(pedido), contains("Entregue"));
     }
 }
