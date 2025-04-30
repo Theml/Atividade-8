@@ -1,37 +1,20 @@
-import java.util.Optional;
+import java.time.LocalDateTime;
+
 public class PedidoMercado extends Pedido {
-    private Mercado mercado;
-    private boolean precisaSubstituicao;
-    private final NotificacaoService notificacaoService;
+    private boolean precisaEmbalagemEspecial;
 
-    public PedidoMercado(int id, Cliente cliente, NotificacaoService notificacaoService) {
+    public PedidoMercado(int id, Cliente cliente) {
         super(id, cliente);
-        this.notificacaoService = notificacaoService;
     }
 
-    public void setMercado(Mercado mercado) {
-        this.mercado = mercado;
-    }
-
-    public void setPrecisaSubstituicao(boolean precisaSubstituicao) {
-        this.precisaSubstituicao = precisaSubstituicao;
-    }
-
-    @Override
     public void preparar() {
-        notificacaoService.notificar("Sistema", "Preparando pedido de mercado: " + 
-            Optional.ofNullable(mercado).map(Mercado::getNome).orElse("Não definido"));
-        
-        if (precisaSubstituicao) {
-            notificacaoService.notificar("Sistema", "Este pedido permite substituição de itens em falta.");
+        System.out.println("Separando itens do mercado...");
+        if (precisaEmbalagemEspecial) {
+            System.out.println("Usando embalagem especial para produtos frágeis");
         }
     }
 
-    public Mercado getMercado() {
-        return mercado;
-    }
-
-    public boolean isPrecisaSubstituicao() {
-        return precisaSubstituicao;
+    public void setPrecisaEmbalagemEspecial(boolean precisa) {
+        this.precisaEmbalagemEspecial = precisa;
     }
 }

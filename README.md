@@ -2,223 +2,180 @@
 
 ## 1. Padrão Singleton
 
-SistemaIFood.java: Implementa o padrão Singleton garantindo que exista apenas uma instância do sistema central
+O `SistemaIFood.java`: Implementa o padrão Singleton
 
-Construtor privado
-Variável estática instance
-Método getInstance() para acessar a instância única
+- Construtor privado
+- Variável estática `instance`
+- Método `getInstance()` para acessar a instância
 
 ## 2. Padrão Factory Method
 
-PedidoFactory.java: Implementa o padrão Factory Method para criar diferentes tipos de pedidos
+O `PedidoFactory.java`: Implementa o padrão Factory Method 
 
-criarPedido() retorna diferentes tipos de pedidos baseados no parâmetro tipo
-Classes concretas: PedidoComida e PedidoMercado
+- Interface base com método `criarPedido()`
+- Factories concretas:
+  - `PedidoRestauranteFactory`
+  - `PedidoMercadoFactory`
+  - `PedidoFarmaciaFactory`
 
 ## 3. Padrão State
 
-EstadoPedido.java: Interface que define o comportamento comum para todos os estados
-Estados concretos que implementam diferentes comportamentos:
+O padrão State é implementado através de:
 
-PedidoEmAndamento.java: Estado quando o pedido está sendo processado
-PedidoEntregue.java: Estado quando o pedido foi entregue com sucesso
-PedidoCancelado.java: Estado quando o pedido foi cancelado
+- `PedidoState.java`: Interface que define o comportamento comum para todos os estados
+- Estados concretos:
+  - `EstadoAgendado.java`: Quando o pedido está agendado
+  - `EstadoEntregue.java`: Quando o pedido foi entregue
+  - `EstadoCancelado.java`: Quando o pedido foi cancelado
 
-Cada estado implementa sua própria lógica no método processarPedido()
-A classe Pedido contém uma referência ao estado atual e delega o comportamento
+Cada estado implementa:
+- Sua própria lógica no método `processarPedido()`
+- O método `getNomeEstado()` para identificação
+- A classe `Pedido` contém uma referência ao estado atual e delega o comportamento
 
 ## 4. Padrão Observer
 
-O padrão Observer é implementado usando a API Java padrão (java.util.Observable e java.util.Observer)
-Cliente.java: Implementa a interface Observer para receber notificações
-Pedido.java: Estende Observable para notificar os observadores sobre mudanças de estado
-Quando um pedido muda de estado, ele notifica automaticamente os clientes registrados
-
-Outras Classes Importantes
-
-Restaurante.java e Mercado.java: Representam os estabelecimentos do sistema
-Produto.java e ItemPedido.java: Representam os produtos e itens dos pedidos
+Implementado usando a API Java padrão:
+- `java.util.Observable`: Estendida pela classe `Pedido`
+- `java.util.Observer`: Implementada pela classe `Cliente`
+- Notificações automáticas quando o pedido muda de estado
 
 ## Fluxo de funcionamento
 
-Quando o sistema é executado, você verá como os pedidos são criados, processados, e como os clientes recebem notificações automáticas sobre as mudanças de estado. A estrutura do código segue os princípios de design patterns e orientação a objetos, proporcionando um sistema flexível e extensível.
-Ao executar o programa, o fluxo será:
+O sistema implementa um fluxo de pedidos com as seguintes etapas:
 
-Criar clientes, restaurantes e mercados
-Cadastrar produtos nos estabelecimentos
-Criar pedidos usando o padrão Factory Method
-Processar pedidos, demonstrando as transições de estado (padrão State)
-Mostrar como os clientes recebem notificações (padrão Observer)
-Exibir um resumo dos pedidos de cada cliente
+1. **Criação do Pedido**
+    - Obtém instância única do `SistemaIFood`
+    - Utiliza factory específica para criar o tipo de pedido
+    - Associa o pedido a um cliente
 
-## Diagrama
+2. **Gerenciamento de Estado**
+   - Pedido inicia sem estado definido
+   - Agendamento define data e hora futura
+   - Preparação específica por tipo:
+     - Restaurante: Gerencia observações da cozinha
+     - Mercado: Controla necessidade de embalagem especial
+     - Farmácia: Valida receitas médicas quando necessário
+
+3. **Transições de Estado**
+   - SemEstado → Agendado (via `agendar()`)
+   - Agendado → Entregue (via `marcarComoEntregue()`)
+   - Agendado → Cancelado (via `cancelar()`)
+   - Cliente é notificado automaticamente das mudanças
+
+4. **Finalização**
+   - Estados finais: Entregue ou Cancelado
+   - Sistema mantém histórico dos pedidos
+   - Não permite transições após estados finais
+
+## Diagrama de Classe do Projeto
 ```mermaid
 classDiagram
-    %% Módulo Usuário
-    class Usuario {
-        -String nome
-        -String email
-        -String endereco
-        +realizarPedido()
-        +visualizarPedidos()
-        +cancelarPedido()
-    }
-    
-    class Cliente {
-        -String nome
-        -String email
-        -String endereco
-        -String telefone
-        +realizarPedido()
-        +visualizarPedidos()
-        +cancelarPedido()
-        +receberNotificacao(String mensagem)
-    }
-    
-    %% Módulo Restaurante
-    class Restaurante {
-        -String nome
-        -String endereco
-        -List~Produto~ cardapio
-        -List~Observer~ observers
-        +adicionarProduto()
-        +removerProduto()
-        +atualizarStatus()
-        +addObserver(Observer o)
-        +removeObserver(Observer o)
-        +notifyObservers()
-    }
-    
-    %% Módulo Singleton
+    %% Módulo Principal
     class SistemaIFood {
-        -static SistemaIFood instance
-        -List~Usuario~ usuarios
-        -List~Restaurante~ restaurantes
-        -List~Pedido~ pedidos
-        -SistemaIFood()
-        +static getInstance() SistemaIFood
-        +cadastrarUsuario()
-        +cadastrarRestaurante()
-        +buscarRestaurante()
-        +processarPagamento()
+        -static instance
+        +getInstance() SistemaIFood
     }
     
     %% Módulo Factory Method
     class PedidoFactory {
-        +criarPedido(TipoPedido tipo) Pedido
+        <<interface>>
+        +criarPedido() Pedido
     }
     
+    class PedidoRestauranteFactory {
+        +criarPedido() PedidoRestaurante
+    }
+    
+    class PedidoMercadoFactory {
+        +criarPedido() PedidoMercado
+    }
+    
+    class PedidoFarmaciaFactory {
+        +criarPedido() PedidoFarmacia
+    }
+    
+    %% Módulo Pedidos
     class Pedido {
-        -int id
-        -Usuario cliente
-        -Restaurante restaurante
-        -List~ItemPedido~ itens
-        -EstadoPedido estado
-        -double valorTotal
-        +adicionarItem()
-        +removerItem()
-        +calcularValor()
-        +setEstado(EstadoPedido estado)
-        +processarPedido()
+        <<abstract>>
+        #int id
+        #Cliente cliente
+        #PedidoState estado
+        +setEstado()
+        +processar()
+        +preparar()*
     }
     
-    class PedidoNormal {
-        +processarPedido()
+    class PedidoRestaurante {
+        +preparar()
     }
     
-    class PedidoExpresso {
-        +processarPedido()
+    class PedidoMercado {
+        +preparar()
     }
     
-    class PedidoAgendado {
-        -Date horarioEntrega
-        +processarPedido()
+    class PedidoFarmacia {
+        +preparar()
     }
     
     %% Módulo State
-    class EstadoPedido {
+    class PedidoState {
         <<interface>>
-        +processarEstado(Pedido pedido)
-        +getNomeEstado() String
+        +processarPedido()
+        +getNomeEstado()
     }
     
-    class EstadoAguardandoConfirmacao {
-        +processarEstado(Pedido pedido)
-        +getNomeEstado() String
-    }
-    
-    class EstadoEmPreparacao {
-        +processarEstado(Pedido pedido)
-        +getNomeEstado() String
-    }
-    
-    class EstadoEmEntrega {
-        +processarEstado(Pedido pedido)
-        +getNomeEstado() String
-    }
-    
-    class EstadoEntregue {
-        +processarEstado(Pedido pedido)
-        +getNomeEstado() String
+    class EstadoAgendado {
+        +processarPedido()
+        +getNomeEstado()
     }
     
     class EstadoCancelado {
-        +processarEstado(Pedido pedido)
-        +getNomeEstado() String
+        +processarPedido()
+        +getNomeEstado()
+    }
+
+    class EstadoEntregue {
+        +processarPedido()
+        +getNomeEstado()
     }
     
     %% Módulo Observer
-    class Observer {
-        <<interface>>
-        +update(String mensagem)
-    }
-    
-    class ClienteObserver {
-        -Cliente cliente
-        +update(String mensagem)
-    }
-    
-    %% Produto e Item Pedido
-    class Produto {
-        -int id
+    class Cliente {
         -String nome
-        -String descricao
-        -double valor
-    }
-    
-    class ItemPedido {
-        -Produto produto
-        -int quantidade
-        +calcularSubtotal()
+        +update(Observable, Object)
+        +cancelarPedido(Pedido)
+        +entregarPedido(Pedido)
     }
     
     %% Relacionamentos
-    SistemaIFood --o Usuario : contém
-    SistemaIFood --o Cliente : contém
-    SistemaIFood --o Restaurante : contém
-    SistemaIFood --o Pedido : gerencia
-    
-    Usuario <|-- Cliente : extends
-    
-    Pedido --o ItemPedido : contém
-    ItemPedido --o Produto : referência
-    
-    Pedido "1" *-- "1" EstadoPedido : possui estado atual
-    EstadoPedido <|.. EstadoAguardandoConfirmacao : implementa
-    EstadoPedido <|.. EstadoEmPreparacao : implementa
-    EstadoPedido <|.. EstadoEmEntrega : implementa
-    EstadoPedido <|.. EstadoEntregue : implementa
-    EstadoPedido <|.. EstadoCancelado : implementa
-    
-    Pedido <|-- PedidoNormal : extends
-    Pedido <|-- PedidoExpresso : extends
-    Pedido <|-- PedidoAgendado : extends
+    SistemaIFood --> PedidoFactory
+    PedidoFactory <|.. PedidoRestauranteFactory
+    PedidoFactory <|.. PedidoMercadoFactory
+    PedidoFactory <|.. PedidoFarmaciaFactory
     
     PedidoFactory ..> Pedido : cria
     
-    Observer <|.. ClienteObserver : implementa
-    Restaurante "1" o-- "*" Observer : notifica
-    Cliente "1" -- "*" Pedido : realiza
-    Cliente ..|> Observer : implementa
-    Restaurante "1" -- "*" Pedido : atende
+    Pedido <|-- PedidoRestaurante
+    Pedido <|-- PedidoMercado
+    Pedido <|-- PedidoFarmacia
+    
+    Pedido o-- PedidoState
+    PedidoState <|.. EstadoAgendado
+    PedidoState <|.. EstadoEntregue
+    PedidoState <|.. EstadoCancelado
+    
+    Pedido --|> Observable
+    Cliente ..|> Observer
+```
+
+## Diagrama de Estado
+```mermaid
+    stateDiagram-v2
+        [*] --> SemEstado: Novo Pedido
+        SemEstado --> Agendado: agendar()
+        Agendado --> Entregue: marcarComoEntregue()
+        Agendado --> Cancelado: cancelar()
+        Entregue --> [*]
+        Cancelado --> [*]
 ```

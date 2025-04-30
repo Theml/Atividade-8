@@ -1,69 +1,68 @@
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Observable;
 
-// Classe base para todos os tipos de pedidos - Utilizada pelo Factory Method
 public abstract class Pedido extends Observable {
-    private int id;
-    private Cliente cliente;
-    private List<ItemPedido> itens;
-    private PedidoState state;
-    private double valorTotal;
+    protected int id;
+    protected Cliente cliente;
+    protected PedidoState estado;
+    private LocalDateTime dataAgendamento;
+    private LocalDateTime dataEntrega;
 
-    protected Pedido(int id, Cliente cliente) {
+    public Pedido(int id, Cliente cliente) {
         this.id = id;
         this.cliente = cliente;
-        this.itens = new ArrayList<>();
-        this.state = PedidoEmAndamento.getInstance();
-        this.valorTotal = 0.0;
         this.addObserver(cliente);
+        // Inicia diretamente como Agendado (conforme seu requisito)
+        this.estado = null;
     }
 
-    public void adicionarItem(Produto produto, int quantidade) {
-        itens.add(new ItemPedido(produto, quantidade));
-        calcularValor();
+    public void agendar(LocalDateTime data) {
+        if (data.isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Data de agendamento não pode ser no passado");
+        }
+        this.dataAgendamento = data;
+        setEstado(new EstadoAgendado(data));
     }
 
-    public void removerItem(ItemPedido item) {
-        itens.remove(item);
-        calcularValor();
+    public void marcarComoEntregue() {
+        if (!(estado instanceof EstadoAgendado)) {
+            throw new IllegalStateException("Só pode entregar pedidos agendados");
+        }
+        this.dataEntrega = LocalDateTime.now();
+        setEstado(new EstadoEntregue());
     }
 
-    public void calcularValor() {
-        this.valorTotal = itens.stream()
-                .mapToDouble(ItemPedido::calcularSubtotal)
-                .sum();
+    public void cancelar() {
+        if (!(estado instanceof EstadoAgendado)) {
+            throw new IllegalStateException("Só pode cancelar pedidos agendados");
+        }
+        setEstado(new EstadoCancelado());
     }
 
-    public void setState(PedidoState newState) {
-        this.state = newState;
+    public void setEstado(PedidoState novoEstado) {
+        this.estado = novoEstado;
         setChanged();
-        notifyObservers(String.format("Pedido #%d agora está: %s", id, state.getNomeState()));
+        notifyObservers("Pedido #" + id + " - " + novoEstado.getNomeEstado());
     }
 
-    public void processarPedido() {
-        state.processarPedido(this);
+    public void processar() {
+        estado.processarPedido(this);
     }
 
-    public abstract void preparar();
+    // Getters
+    public LocalDateTime getDataAgendamento() {
+        return dataAgendamento;
+    }
 
-    public int getId() {
+    public LocalDateTime getDataEntrega() {
+        return dataEntrega;
+    }
+
+    public PedidoState getEstado() {
+        return estado;
+    }
+
+    public int getId(){
         return id;
-    }
-
-    public PedidoState getState() {
-        return state;
-    }
-
-    public Cliente getCliente() {
-        return cliente;
-    }
-
-    public double getValorTotal() {
-        return valorTotal;
-    }
-
-    public List<ItemPedido> getItens() {
-        return itens;
     }
 }

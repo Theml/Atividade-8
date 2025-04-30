@@ -1,88 +1,120 @@
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
-public class PedidoTest {
-    private Pedido pedido;
-    private Cliente clienteMock;
-    private NotificacaoService notificacaoServiceMock;
-    
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
+class PedidoTest {
+    private Cliente cliente;
+    private LocalDateTime dataAgendamento;
+
     @BeforeEach
-    public void setUp() {
-        notificacaoServiceMock = mock(NotificacaoService.class);
-        clienteMock = new Cliente("João", "joao@test.com", "Rua Teste", "123456789","");
-        pedido = new PedidoComida(1, clienteMock, notificacaoServiceMock);
+    void setUp() {
+        cliente = new Cliente("João Silva");
+        dataAgendamento = LocalDateTime.now().plus(1, ChronoUnit.HOURS);
     }
-    
+
+    // Testes genéricos para a classe Pedido
     @Test
-    public void testAdicionarItem() {
-        Produto produto = new Produto(1, "Produto Teste", 10.0);
-        pedido.adicionarItem(produto, 2);
-        
-        assertEquals(1, pedido.getItens().size());
-        assertEquals(20.0, pedido.getValorTotal());
-    }
-    
-    @Test
-    public void testRemoverItem() {
-        Produto produto = new Produto(1, "Produto Teste", 10.0);
-        ItemPedido item = new ItemPedido(produto, 2);
-        pedido.adicionarItem(produto, 2);
-        pedido.removerItem(item);
-        
-        assertEquals(0, pedido.getItens().size());
-        assertEquals(0.0, pedido.getValorTotal());
-    }
-    
-    @Test
-    public void testStateTransition() {
-        pedido.setState(PedidoEmAndamento.getInstance());
-        assertEquals("Em Andamento", pedido.getState().getNomeState());
-        
-        pedido.setState(PedidoEntregue.getInstance());
-        assertEquals("Entregue", pedido.getState().getNomeState());
-    }
-    
-    @Test
-    public void testObserverNotification() {
-        pedido.setState(PedidoCancelado.getInstance());
-        // Verifica se a notificação foi enviada ao cliente
-        verify(notificacaoServiceMock, atLeastOnce()).notificar(anyString(), anyString());
+    void testNovoPedidoSemEstadoInicial() {
+        PedidoRestaurante pedido = new PedidoRestaurante(1, cliente);
+        assertNull(pedido.getEstado(), "Pedido novo não deve ter estado definido até ser agendado");
     }
 
     @Test
-    public void testPedidoFactoryCriacaoTipos() {
-        Pedido comida = pedidoFactory.criarPedido("comida", cliente);
-        assertTrue(comida instanceof PedidoComida);
-        
-        Pedido mercado = pedidoFactory.criarPedido("mercado", cliente);
-        assertTrue(mercado instanceof PedidoMercado);
-        
-        assertThrows(IllegalArgumentException.class, () -> 
-            pedidoFactory.criarPedido("invalido", cliente));
+    void testAgendamentoPedido() {
+        PedidoRestaurante pedido = new PedidoRestaurante(1, cliente);
+        pedido.agendar(dataAgendamento);
+
+        assertTrue(pedido.getEstado() instanceof EstadoAgendado);
+        assertEquals(dataAgendamento, pedido.getDataAgendamento());
     }
 
     @Test
-    public void testPedidoMercadoSubstituicao() {
-        PedidoMercado pedido = (PedidoMercado) cliente.realizarPedido(sistema.getPedidoFactory(), "mercado");
-        pedido.setPrecisaSubstituicao(true);
-        pedido.preparar();
-        
-        // Verificar se a notificação de substituição foi enviada
-        MockNotificacaoService mock = (MockNotificacaoService) notificacaoService;
-        assertTrue(mock.getNotificacoes().stream()
-            .anyMatch(msg -> msg.contains("substituição")));
+    void testAgendamentoDataPassado() {
+        PedidoRestaurante pedido = new PedidoRestaurante(1, cliente);
+        assertThrows(IllegalArgumentException.class, () ->
+                pedido.agendar(LocalDateTime.now().minusHours(1)));
+    }
+
+    // Testes específicos para PedidoRestaurante
+    @Test
+    void testPreparoPedidoRestaurante() {
+        PedidoRestaurante pedido = new PedidoRestaurante(1, cliente);
+        pedido.setObservacoesCozinha("Sem cebola");
+
+        assertDoesNotThrow(() -> pedido.preparar());
     }
 
     @Test
-    public void testRestauranteProcessamentoPedido() {
-        PedidoComida pedido = (PedidoComida) cliente.realizarPedido(sistema.getPedidoFactory(), "comida");
-        pedido.setRestaurante(restaurante);
-        pedido.adicionarItem(produtoRestaurante, 1);
-        
-        restaurante.processarPedido(pedido);
-        
-        assertEquals("Entregue", pedido.getState().getNomeState());
+    void testPreparoComObservacoes() {
+        PedidoRestaurante pedido = new PedidoRestaurante(1, cliente);
+        pedido.setObservacoesCozinha("Sem lactose");
+        pedido.preparar(); // Verifique a saída manualmente ou com Mock
+    }
+
+    // Testes específicos para PedidoMercado
+    @Test
+    void testPreparoPedidoMercado() {
+        PedidoMercado pedido = new PedidoMercado(2, cliente);
+        pedido.setPrecisaEmbalagemEspecial(true);
+
+        assertDoesNotThrow(() -> pedido.preparar());
+    }
+
+    // Testes específicos para PedidoFarmacia
+    @Test
+    void testPreparoPedidoFarmacia() {
+        PedidoFarmacia pedido = new PedidoFarmacia(3, cliente);
+        pedido.setReceitaMedica(true);
+
+        assertDoesNotThrow(() -> {
+            pedido.preparar();
+            pedido.verificarValidadeMedicamentos();
+        });
+    }
+
+    // Testes de transição de estados
+    @Test
+    void testTransicaoParaEntregue() {
+        PedidoRestaurante pedido = new PedidoRestaurante(1, cliente);
+        pedido.agendar(dataAgendamento);
+        pedido.marcarComoEntregue();
+
+        assertTrue(pedido.getEstado() instanceof EstadoEntregue);
+        assertNotNull(pedido.getDataEntrega());
+    }
+
+    @Test
+    void testTransicaoParaCancelado() {
+        PedidoMercado pedido = new PedidoMercado(2, cliente);
+        pedido.agendar(dataAgendamento);
+        pedido.cancelar();
+
+        assertTrue(pedido.getEstado() instanceof EstadoCancelado);
+    }
+
+    @Test
+    void testCancelamentoSemAgendamento() {
+        PedidoFarmacia pedido = new PedidoFarmacia(3, cliente);
+        assertThrows(IllegalStateException.class, () -> pedido.cancelar());
+    }
+
+    // Teste de notificação (usando Mock)
+    @Test
+    void testNotificacaoMudancaEstado() {
+        Cliente clienteMock = mock(Cliente.class);
+        PedidoRestaurante pedido = new PedidoRestaurante(1, clienteMock);
+
+        pedido.agendar(dataAgendamento);
+        verify(clienteMock).update(eq(pedido), contains("Agendado"));
+
+        pedido.marcarComoEntregue();
+        verify(clienteMock).update(eq(pedido), contains("Entregue"));
     }
 }
