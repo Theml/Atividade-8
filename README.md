@@ -179,3 +179,23 @@ classDiagram
         Entregue --> [*]
         Cancelado --> [*]
 ```
+
+---
+### Autores
+
+- **Luis Gustavo**
+- **Marciana Pereira**
+
+### Propósito Educacional
+
+Este projeto é uma implementação acadêmica que demonstra um sistema simplificado inspirado no iFood, desenvolvido como parte da disciplina de Arquitetura de Projetos. O sistema serve como exemplo prático da aplicação dos seguintes padrões de projeto:
+
+- **Singleton**: Gerenciamento centralizado do sistema
+- **Factory Method**: Criação flexível de diferentes tipos de pedidos
+- **State**: Controle das transições de estado dos pedidos
+- **Observer**: Notificação automática de mudanças aos clientes
+
+Este projeto foi desenvolvido totalmente com fins acadêmicos para demonstrar o entendimento e aplicação prática de padrões de projeto em um cenário real, permitindo uma melhor compreensão de como diferentes padrões podem trabalhar em conjunto para criar uma solução robusta e flexível.
+
+---
+*Projeto desenvolvido em 2025 como parte da disciplina de Arquitetura de Projetos.*
