@@ -2,17 +2,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SistemaIFood {
-    private static SistemaIFood instance;
     private final List<Pedido> pedidos = new ArrayList<>();
 
     private SistemaIFood() {}
-
-    public static synchronized SistemaIFood getInstance() {
-        if (instance == null) {
-            instance = new SistemaIFood();
-        }
+    private static SistemaIFood instance = new SistemaIFood();
+    public static SistemaIFood getInstance() {
         return instance;
     }
+     
 
     public Pedido criarPedido(PedidoFactory factory, Cliente cliente) {
         Pedido pedido = factory.criarPedido(pedidos.size() + 1, cliente);

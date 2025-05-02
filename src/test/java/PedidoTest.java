@@ -15,27 +15,18 @@ class PedidoTest {
         dataAgendamento = LocalDateTime.now().plus(1, ChronoUnit.HOURS);
     }
 
-    // Testes genéricos para a classe Pedido
     @Test
-    void testNovoPedidoSemEstadoInicial() {
-        PedidoRestaurante pedido = new PedidoRestaurante(1, cliente);
-        assertNull(pedido.getEstado(), "Pedido novo não deve ter estado definido até ser agendado");
-    }
-
-    @Test
-    void testAgendamentoPedido() {
-        PedidoRestaurante pedido = new PedidoRestaurante(1, cliente);
-        pedido.agendar(dataAgendamento);
-
+    void testPedidoCriadoComEstadoAgendado() {
+        PedidoRestaurante pedido = new PedidoRestaurante(1, cliente, dataAgendamento);
         assertTrue(pedido.getEstado() instanceof EstadoAgendado);
         assertEquals(dataAgendamento, pedido.getDataAgendamento());
     }
 
     @Test
-    void testAgendamentoDataPassado() {
-        PedidoRestaurante pedido = new PedidoRestaurante(1, cliente);
-        assertThrows(IllegalArgumentException.class, () ->
-                pedido.agendar(LocalDateTime.now().minusHours(1)));
+    void testCriacaoComDataInvalida() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            new PedidoRestaurante(1, cliente, LocalDateTime.now().minusHours(1));
+        });
     }
 
     // Testes específicos para PedidoRestaurante
@@ -51,7 +42,7 @@ class PedidoTest {
     void testPreparoComObservacoes() {
         PedidoRestaurante pedido = new PedidoRestaurante(1, cliente);
         pedido.setObservacoesCozinha("Sem lactose");
-        pedido.preparar(); // Verifique a saída manualmente ou com Mock
+        pedido.preparar();
     }
 
     // Testes específicos para PedidoMercado
@@ -78,8 +69,7 @@ class PedidoTest {
     // Testes de transição de estados
     @Test
     void testTransicaoParaEntregue() {
-        PedidoRestaurante pedido = new PedidoRestaurante(1, cliente);
-        pedido.agendar(dataAgendamento);
+        PedidoRestaurante pedido = new PedidoRestaurante(1, cliente, dataAgendamento);
         pedido.marcarComoEntregue();
 
         assertTrue(pedido.getEstado() instanceof EstadoEntregue);
@@ -88,16 +78,9 @@ class PedidoTest {
 
     @Test
     void testTransicaoParaCancelado() {
-        PedidoMercado pedido = new PedidoMercado(2, cliente);
-        pedido.agendar(dataAgendamento);
+        PedidoMercado pedido = new PedidoMercado(2, cliente, dataAgendamento);
         pedido.cancelar();
 
         assertTrue(pedido.getEstado() instanceof EstadoCancelado);
-    }
-
-    @Test
-    void testCancelamentoSemAgendamento() {
-        PedidoFarmacia pedido = new PedidoFarmacia(3, cliente);
-        assertThrows(IllegalStateException.class, () -> pedido.cancelar());
     }
 }

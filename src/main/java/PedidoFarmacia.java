@@ -3,8 +3,14 @@ import java.time.LocalDateTime;
 public class PedidoFarmacia extends Pedido{
     private boolean receitaMedica;
 
-    public PedidoFarmacia(int id, Cliente cliente){
-        super(id, cliente);
+    // Construtor padrão
+    public PedidoFarmacia(int id, Cliente cliente, LocalDateTime dataAgendamento) {
+        super(id, cliente, dataAgendamento);
+    }
+
+    // Construtor com data personalizada
+    public PedidoFarmacia(int id, Cliente cliente) {
+        this(id, cliente, LocalDateTime.now().plusHours(3));
     }
 
     public void preparar() {
