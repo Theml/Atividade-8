@@ -152,7 +152,7 @@ classDiagram
         +processarPedido()
         +getNomeEstado()
     }
-
+    
     class EstadoEntregue {
         +processarPedido()
         +getNomeEstado()
@@ -183,19 +183,21 @@ classDiagram
     PedidoState <|.. EstadoEntregue
     PedidoState <|.. EstadoCancelado
     
+    %% Conexão Cliente-Pedido
+    Cliente --> Pedido : faz
+    
     Pedido --|> Observable
     Cliente ..|> Observer
 ```
 
 ## Diagrama de Estado
 ```mermaid
-    stateDiagram-v2
-        [*] --> SemEstado: Novo Pedido
-        SemEstado --> Agendado: agendar()
-        Agendado --> Entregue: marcarComoEntregue()
-        Agendado --> Cancelado: cancelar()
-        Entregue --> [*]
-        Cancelado --> [*]
+stateDiagram-v2
+    [*] --> Agendado: Novo Pedido
+    Agendado --> Entregue: marcarComoEntregue()
+    Agendado --> Cancelado: cancelar()
+    Entregue --> [*]
+    Cancelado --> [*]
 ```
 
 ---
